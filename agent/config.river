@@ -1,0 +1,120 @@
+logging { 
+  level   = "error" 
+  format  = "logfmt"
+
+}
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  port = 12345
+
+}
+
+
+
+
+prometheus.exporter.unix { }
+
+prometheus.scrape "unix" {
+  targets    = prometheus.exporter.unix.targets
+  forward_to = [prometheus.remote_write.prom.receiver]
+
+}
+
+prometheus.scrape "engine" {
+  targets    = [{"__address__" = "localhost:9323"}]
+  job_name   = env("USE_HOSTNAME")
+  forward_to = [prometheus.remote_write.prom.receiver] 
+  
+}
+
+prometheus.scrape "agent" {
+  targets = [{"__address__" = "localhost:12345"}]
+  job_name   = env("USE_HOSTNAME")
+  forward_to = [prometheus.remote_write.prom.receiver] 
+
+}
+
+prometheus.remote_write "prom" {
+	endpoint {
+		url = env("CORTEX_URL")
+  
+    basic_auth {
+      username = env("CORTEX_USER")
+      password = env("CORTEX_PASS")
+
+    }
+	}
+}
+
+
+
+
+loki.source.journal "default" {
+  forward_to    = [loki.process.filter.receiver] 
+  labels        = {"job" = "journalctl", "instance" = env("USE_HOSTNAME")} 
+  relabel_rules = loki.relabel.journal.rules 
+
+}
+
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.containers.targets
+  forward_to = [loki.process.filter.receiver]
+  labels     = {"job" = "docker", "instance" = env("USE_HOSTNAME")}
+  relabel_rules = loki.relabel.docker.rules
+
+}
+
+loki.relabel "journal" { 
+  forward_to = [] 
+
+  rule { 
+    action        = "replace" 
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit" 
+
+  }
+}
+
+loki.relabel "docker" {
+  forward_to = []
+
+  rule { 
+    action        = "replace" 
+    source_labels = ["__meta_docker_container_name"]
+    target_label  = "container_name"
+
+  }
+}
+
+loki.process "filter" { 
+  forward_to  = [loki.write.endpoint.receiver]
+
+  stage.drop { 
+    older_than = "1h" 
+    drop_counter_reason = "Too old" 
+
+  }
+  stage.drop {
+    longer_than = "3KB"
+    drop_counter_reason = "Too big" 
+    
+  }
+  stage.drop { 
+    expression = "GrafanaAgent|Uptime-Kuma" 
+    drop_counter_reason = "Monitoring Host"
+  }
+}
+
+loki.write "endpoint" {
+  endpoint {
+    url =env("LOKI_URL")
+  
+    basic_auth {
+      username = env("LOKI_USER")
+      password = env("LOKI_PASS")
+
+    }
+  }
+}

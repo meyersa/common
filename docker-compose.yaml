@@ -1,0 +1,96 @@
+version: "3"
+services:
+  # crowdsec WIP, see focalboard
+  # crowdsec: 
+  #   profiles: [crowdsec, all]
+  #   image: crowdsecurity/crowdsec
+  #   restart: always 
+  #   environment:
+  #     COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe "
+  #   volumes: 
+  #     - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+  #     - /srv/crowdsec/db:/var/lib/crowdsec/data/
+  #     - /srv/crowdsec/config:/etc/crowdsec/
+  # crowdsec-firewall-bouncer: 
+  #   profiles: [crowdsec, all]
+  #   build: ./crowdsec-firewall-bouncer 
+  #   container_name: crowdsec-firewall-bouncer 
+  #   restart: always 
+  #   depends_on: crowdsec 
+  #   environment:
+  #     - TZ=America/Detroit
+  #   cap_add: 
+  #     - NET_ADMIN
+  #     - NET_RAW
+  #   network_mode: "host" 
+  #   volumes: 
+  #     - ./crowdsec-firewall-bouncer/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+  cloudflared: 
+    profiles: [cloudflared, all]
+    image: cloudflare/cloudflared
+    container_name: cloudflare
+    restart: always 
+    command: tunnel run 
+    environment: 
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    networks:
+      - proxy
+  watchtower: 
+    profiles: [watchtower, all]
+    image: containrrr/watchtower
+    container_name: watchtower 
+    hostname: ${USE_HOSTNAME}
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock 
+    environment: 
+      WATCHTOWER_NOTIFICATION_REPORT: "true"
+      WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}
+  s3-backup:
+    profiles: [ s3-backup, all ]
+    build: https://github.com/meyersa/backup-s3.git
+    container_name: s3-backup
+    init: true 
+    restart: always 
+    environment:
+      BACKUP_ENABLED: ${BACKUP_ENABLED}
+      S3_REGION: ${S3_REGION}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL}
+      DATA_PATH: ${DATA_PATH}
+      CRON_SCHEDULE: ${CRON_SCHEDULE}
+    volumes: 
+      - /srv:/srv:ro 
+    labels: 
+      - "com.centurylinklabs.watchtower.enable=false" 
+  agent:
+    profiles: [ agent, all ]
+    image: grafana/agent:latest
+    container_name: grafana-agent
+    restart: always
+    volumes:
+      - ./agent/config.river:/etc/agent/config.river
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /proc:/host/proc:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/log/journal:/var/log/journal
+      - /var/run/journal:/var/run/journal
+      - /etc/machine-id:/etc/machine-id:ro
+    entrypoint:
+      - /bin/grafana-agent
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - ./etc/agent/config.river
+    env_file:
+      - .env
+    environment:
+      AGENT_MODE: flow
+    network_mode: "host"
+
+networks: 
+  default: 
+  proxy: 
+    name: proxy
