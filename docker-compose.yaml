@@ -25,10 +25,24 @@ services:
   #   network_mode: "host" 
   #   volumes: 
   #     - ./crowdsec-firewall-bouncer/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+  trafficjam: 
+    profiles: [ trafficjam, all ] 
+    build: https://github.com/kaysond/trafficjam.git
+    container_name: trafficjam
+    restart: always
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      NETWORK: proxy
+      WHITELIST_FILTER: ancestor=cloudflare/cloudflared
+      TZ: America/Detroit 
   cloudflared: 
     profiles: [cloudflared, all]
     image: cloudflare/cloudflared
-    container_name: cloudflare
+    container_name: cloudflared
     restart: always 
     command: tunnel run 
     environment: 
@@ -36,7 +50,7 @@ services:
     networks:
       - proxy
   watchtower: 
-    profiles: [watchtower, all]
+    profiles: [watchtower, private, all]
     image: containrrr/watchtower
     container_name: watchtower 
     hostname: ${USE_HOSTNAME}
@@ -46,7 +60,7 @@ services:
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}
   s3-backup:
-    profiles: [ s3-backup, all ]
+    profiles: [ s3-backup, private, all ]
     build: https://github.com/meyersa/backup-s3.git
     container_name: s3-backup
     init: true 
@@ -65,7 +79,7 @@ services:
     labels: 
       - "com.centurylinklabs.watchtower.enable=false" 
   agent:
-    profiles: [ agent, all ]
+    profiles: [ agent, private, all ]
     image: grafana/agent:latest
     container_name: grafana-agent
     restart: always
