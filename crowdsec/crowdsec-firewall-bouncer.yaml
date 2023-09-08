@@ -1,0 +1,19 @@
+mode: iptables
+pid_dir: /var/run/
+update_frequency: 10s
+daemonize: false
+log_mode: stdout
+log_level: debug
+log_max_size: 1000
+#api_url: http://localhost:8080/
+api_key: 553e4d203e5d59744f499a2cb886cb70
+disable_ipv6: true
+deny_action: DROP
+deny_log: false
+supported_decisions_types:
+  - ban
+blacklists_ipv4: crowdsec-blacklists
+iptables_chains:
+#  - INPUT
+#  - FORWARD
+  - DOCKER-USER

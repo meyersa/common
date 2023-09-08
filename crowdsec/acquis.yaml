@@ -1,0 +1,30 @@
+source: journalctl
+journalctl_filter:
+ - "_SYSTEMD_UNIT=ssh.service"
+labels:
+  program: sshd
+  type: syslog
+---
+source: docker
+container_name_regexp: 
+  - .*nginx.*
+labels:
+  type: nginx
+--- 
+source: docker 
+container_name: 
+  - grafana 
+labels: 
+  type: grafana 
+--- 
+source: docker 
+container_name: 
+  - mariadb.* 
+labels: 
+  type: mysql 
+---
+source: docker
+container_name:
+ - uptimekuma
+labels:
+  type: uptime-kuma

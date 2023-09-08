@@ -1,22 +1,22 @@
 version: "3"
 services:
-  # crowdsec WIP, see focalboard
   # crowdsec: 
   #   profiles: [crowdsec, all]
-  #   image: crowdsecurity/crowdsec
-  #   restart: always 
+  #   image: crowdsecurity/crowdsec:latest-debian
+  #   container_name: crowdsec 
+  #   # restart: always 
   #   environment:
-  #     COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe "
+  #     COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe crowdsecurity/sshd crowdsecurity/nginx crowdsecurity/wordpress crowdsecurity/mariadb timokoessler/uptime-kuma"
   #   volumes: 
   #     - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-  #     - /srv/crowdsec/db:/var/lib/crowdsec/data/
-  #     - /srv/crowdsec/config:/etc/crowdsec/
+  #     - /var/log/journal:/run/log/journal
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: bash -c "sleep 15 && cscli console enroll ${CROWDSEC_TOKEN}"
   # crowdsec-firewall-bouncer: 
-  #   profiles: [crowdsec, all]
-  #   build: ./crowdsec-firewall-bouncer 
+  #   profiles: [crowdsec-firewall-bouncer, all]
+  #   build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
   #   container_name: crowdsec-firewall-bouncer 
   #   restart: always 
-  #   depends_on: crowdsec 
   #   environment:
   #     - TZ=America/Detroit
   #   cap_add: 
@@ -24,7 +24,7 @@ services:
   #     - NET_RAW
   #   network_mode: "host" 
   #   volumes: 
-  #     - ./crowdsec-firewall-bouncer/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+  #     - ./crowdsec/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
   trafficjam: 
     profiles: [ trafficjam, all ] 
     build: https://github.com/kaysond/trafficjam.git
