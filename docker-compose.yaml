@@ -53,6 +53,7 @@ services:
     profiles: [watchtower, private, all]
     image: containrrr/watchtower
     container_name: watchtower 
+    restart: always
     hostname: ${USE_HOSTNAME}
     volumes: 
       - /var/run/docker.sock:/var/run/docker.sock 
@@ -103,6 +104,10 @@ services:
     environment:
       AGENT_MODE: flow
     network_mode: "host"
+    deploy: 
+      resources: 
+        limits: 
+          cpus: '0.5'
 
 networks: 
   default: 
