@@ -5,10 +5,13 @@
 - Docker compose for whole stack
     - s3-backup
     - grafana agent
+    - watchtower
+    - cloudflared
+    - trafficjam
+    - crowdsec
 - env that has host information
-- script that pushes env into the respective configs
 
 ## TODO 
 
-- setup watchtower 
-- setup crowdsec
+- link crowdsec bouncer to crowdsec
+- cf ddns
