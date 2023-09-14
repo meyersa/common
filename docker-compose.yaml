@@ -9,24 +9,26 @@ services:
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe crowdsecurity/sshd crowdsecurity/nginx crowdsecurity/wordpress crowdsecurity/mariadb timokoessler/uptime-kuma"
       CROWDSEC_TOKEN: ${CROWDSEC_TOKEN}
     volumes: 
-      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
       - /var/log/journal:/run/log/journal
       - /var/run/docker.sock:/var/run/docker.sock
       - ./crowdsec/start.sh:/start.sh
+      - "/srv/crowdsec/config:/etc/crowdsec"
+      - "./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml"
+
     entrypoint: [ "/bin/sh", "-c", "/bin/bash start.sh"]
-  crowdsec-firewall-bouncer: 
-    profiles: [crowdsec-firewall-bouncer, all]
-    build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
-    container_name: crowdsec-firewall-bouncer 
-    restart: always 
-    environment:
-      - TZ=America/Detroit
-    cap_add: 
-      - NET_ADMIN
-      - NET_RAW
-    network_mode: "host" 
-    volumes: 
-      - ./crowdsec/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+  # crowdsec-firewall-bouncer: 
+  #   profiles: [crowdsec-firewall-bouncer, all]
+  #   build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
+  #   container_name: crowdsec-firewall-bouncer 
+  #   restart: always 
+  #   environment:
+  #     - TZ=America/Detroit
+  #   cap_add: 
+  #     - NET_ADMIN
+  #     - NET_RAW
+  #   network_mode: "host" 
+  #   volumes: 
+  #     - ./crowdsec/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
   trafficjam: 
     profiles: [ trafficjam, all ] 
     build: https://github.com/kaysond/trafficjam.git
