@@ -11,6 +11,7 @@ services:
       CF_API_TOKEN: ${CF_API_TOKEN}
       DOMAINS: ${USE_HOSTNAME}
       PROXIED: false
+      IP6_PROVIDER: none
   crowdsec: 
     profiles: [ crowdsec, private, all, all-unsec ]
     image: crowdsecurity/crowdsec:latest-debian
