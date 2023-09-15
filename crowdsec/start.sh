@@ -1,4 +1,4 @@
 ./docker_start.sh &
-sleep 10
+sleep 30
 cscli console enroll ${CROWDSEC_TOKEN}
 tail -f /dev/null

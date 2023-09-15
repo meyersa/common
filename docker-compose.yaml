@@ -1,7 +1,18 @@
 version: "3"
 services:
+  cloudflare-ddns:
+    profiles: [ cloudflare-ddns, private, all, all-unsec ] 
+    image: favonia/cloudflare-ddns 
+    restart: always 
+    read_only: true 
+    security_opt: 
+      - no-new-privileges:true 
+    environment:
+      CF_API_TOKEN: ${CF_API_TOKEN}
+      DOMAINS: ${USE_HOSTNAME}
+      PROXIED: false
   crowdsec: 
-    profiles: [crowdsec, private, all]
+    profiles: [ crowdsec, private, all, all-unsec ]
     image: crowdsecurity/crowdsec:latest-debian
     container_name: crowdsec 
     restart: always 
@@ -14,9 +25,9 @@ services:
       - ./crowdsec/start.sh:/start.sh
       - "/srv/crowdsec/config:/etc/crowdsec"
       - "./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml"
-    entrypoint: [ "/bin/sh", "-c", "/bin/bash start.sh"]
+    entrypoint: [ "/bin/sh", "-c", "/bin/bash start.sh" ]
   # crowdsec-firewall-bouncer: 
-  #   profiles: [crowdsec-firewall-bouncer, private, all]
+  #   profiles: [crowdsec-firewall-bouncer, private, all, all-unsec]
   #   build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
   #   container_name: crowdsec-firewall-bouncer 
   #   restart: always 
@@ -43,7 +54,7 @@ services:
       WHITELIST_FILTER: ancestor=cloudflare/cloudflared
       TZ: America/Detroit 
   cloudflared: 
-    profiles: [cloudflared, all]
+    profiles: [ cloudflared, all, all-unsec ]
     image: cloudflare/cloudflared
     container_name: cloudflared
     restart: always 
@@ -53,7 +64,7 @@ services:
     networks:
       - proxy
   watchtower: 
-    profiles: [watchtower, private, all]
+    profiles: [ watchtower, private, all, all-unsec ]
     image: containrrr/watchtower
     container_name: watchtower 
     restart: always
@@ -64,7 +75,7 @@ services:
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATION_URL: ${WATCHTOWER_NOTIFICATION_URL}
   s3-backup:
-    profiles: [ s3-backup, private, all ]
+    profiles: [ s3-backup, private, all, all-unsec ]
     build: https://github.com/meyersa/backup-s3.git
     container_name: s3-backup
     init: true 
@@ -83,7 +94,7 @@ services:
     labels: 
       - "com.centurylinklabs.watchtower.enable=false" 
   agent:
-    profiles: [ agent, private, all ]
+    profiles: [ agent, private, all, all-unsec ]
     image: grafana/agent:latest
     container_name: grafana-agent
     restart: always
