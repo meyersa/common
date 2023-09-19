@@ -18,28 +18,34 @@ services:
     container_name: crowdsec 
     restart: always 
     environment:
-      COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe crowdsecurity/sshd crowdsecurity/nginx crowdsecurity/wordpress crowdsecurity/mariadb timokoessler/uptime-kuma"
-      CROWDSEC_TOKEN: ${CROWDSEC_TOKEN}
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe crowdsecurity/sshd" #crowdsecurity/nginx crowdsecurity/wordpress crowdsecurity/mariadb timokoessler/uptime-kuma"
+      ENROLL_KEY: ${CROWDSEC_TOKEN}
+      CROWDSEC_WEBHOOK: ${CROWDSEC_WEBHOOK}
+      BOUNCER_KEY_IPTABLES: "4JCich*XJd9j#3RsT5kac!#m*!m&2w"
     volumes: 
       - /var/log/journal:/run/log/journal
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./crowdsec/start.sh:/start.sh
+      # - /var/run/docker.sock:/var/run/docker.sock
       - "/srv/crowdsec/config:/etc/crowdsec"
       - "./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml"
-    entrypoint: [ "/bin/sh", "-c", "/bin/bash start.sh" ]
-  # crowdsec-firewall-bouncer: 
-  #   profiles: [crowdsec-firewall-bouncer, private, all, all-unsec]
-  #   build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
-  #   container_name: crowdsec-firewall-bouncer 
-  #   restart: always 
-  #   environment:
-  #     - TZ=America/Detroit
-  #   cap_add: 
-  #     - NET_ADMIN
-  #     - NET_RAW
-  #   network_mode: "host" 
-  #   volumes: 
-  #     - ./crowdsec/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+      - "./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml"
+      - "./crowdsec/slack.yaml:/etc/crowdsec/notifications/slack.yaml"
+    ports: 
+      - "127.0.0.1:8080:8080"
+  crowdsec-firewall-bouncer: 
+    profiles: [crowdsec-firewall-bouncer, private, all, all-unsec]
+    build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
+    container_name: crowdsec-firewall-bouncer 
+    restart: always 
+    environment:
+      - TZ=America/Detroit
+    cap_add: 
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+    volumes: 
+      - ./crowdsec/crowdsec-firewall-bouncer.yaml:/crowdsec-firewall-bouncer.yaml
+    labels: 
+      - "com.centurylinklabs.watchtower.enable=false" 
   trafficjam: 
     profiles: [ trafficjam, all ] 
     build: https://github.com/kaysond/trafficjam.git
@@ -54,6 +60,8 @@ services:
       NETWORK: proxy
       WHITELIST_FILTER: ancestor=cloudflare/cloudflared
       TZ: America/Detroit 
+    labels: 
+      - "com.centurylinklabs.watchtower.enable=false" 
   cloudflared: 
     profiles: [ cloudflared, all, all-unsec ]
     image: cloudflare/cloudflared
