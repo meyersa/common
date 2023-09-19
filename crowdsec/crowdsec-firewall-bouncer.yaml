@@ -5,7 +5,7 @@ daemonize: false
 log_mode: stdout
 log_level: info
 log_max_size: 1000
-api_url: http://localhost:8080/
+api_url: http://localhost:29682/
 api_key: 4JCich*XJd9j#3RsT5kac!#m*!m&2w
 disable_ipv6: true
 deny_action: DROP

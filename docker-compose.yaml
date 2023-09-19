@@ -30,7 +30,8 @@ services:
       - "./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml"
       - "./crowdsec/slack.yaml:/etc/crowdsec/notifications/slack.yaml"
     ports: 
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:29682:8080"
+      - "127.0.0.1:6060:6060"
   crowdsec-firewall-bouncer: 
     profiles: [crowdsec-firewall-bouncer, private, all, all-unsec]
     build: https://github.com/meyersa/crowdsec-firewall-bouncer.git
