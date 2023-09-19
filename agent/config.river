@@ -35,6 +35,13 @@ prometheus.scrape "agent" {
 
 }
 
+prometheus.scrape "crowdsec" {
+  targets = [{"__address__" = "localhost:6060"}]
+  job_name   = env("USE_HOSTNAME")
+  forward_to = [prometheus.remote_write.prom.receiver] 
+
+}
+
 prometheus.remote_write "prom" {
 	endpoint {
 		url = env("CORTEX_URL")

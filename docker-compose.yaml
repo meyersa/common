@@ -20,12 +20,13 @@ services:
     environment:
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/linux-lpe crowdsecurity/sshd" #crowdsecurity/nginx crowdsecurity/wordpress crowdsecurity/mariadb timokoessler/uptime-kuma"
       ENROLL_KEY: ${CROWDSEC_TOKEN}
+      ENROLL_INSTANCE_NAME: ${USE_HOSTNAME}
       CROWDSEC_WEBHOOK: ${CROWDSEC_WEBHOOK}
       BOUNCER_KEY_IPTABLES: "4JCich*XJd9j#3RsT5kac!#m*!m&2w"
     volumes: 
       - /var/log/journal:/run/log/journal
       # - /var/run/docker.sock:/var/run/docker.sock
-      - "/srv/crowdsec/config:/etc/crowdsec"
+      # - "/srv/crowdsec/config:/etc/crowdsec"
       - "./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml"
       - "./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml"
       - "./crowdsec/slack.yaml:/etc/crowdsec/notifications/slack.yaml"
