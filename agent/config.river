@@ -111,6 +111,17 @@ loki.process "filter" {
   stage.drop { 
     expression = "GrafanaAgent|Uptime-Kuma" 
     drop_counter_reason = "Monitoring Host"
+
+  }
+  stage.drop { 
+    expression = "could not set up a wait request to the Docker client"
+    drop_counter_reason = "Spammy Log" 
+
+  }
+  stage.drop { 
+    expression  = ".*debug.*"
+    drop_counter_reason = "Debug" 
+    
   }
 }
 
