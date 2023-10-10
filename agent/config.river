@@ -13,10 +13,10 @@ discovery.docker "containers" {
 
 
 
-prometheus.exporter.unix { }
+prometheus.exporter.unix "default" { }
 
 prometheus.scrape "unix" {
-  targets    = prometheus.exporter.unix.targets
+  targets    = prometheus.exporter.unix.default.targets
   forward_to = [prometheus.remote_write.prom.receiver]
 
 }
