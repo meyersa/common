@@ -119,6 +119,7 @@ services:
       - /var/log/journal:/var/log/journal
       - /var/run/journal:/var/run/journal
       - /etc/machine-id:/etc/machine-id:ro
+      - ./maxmind/GeoLite2-City.mmdb:/maxmind/GeoLite2-City.mmdb
     entrypoint:
       - /bin/grafana-agent
       - run
