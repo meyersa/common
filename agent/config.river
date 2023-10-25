@@ -163,6 +163,42 @@ loki.process "metrics" {
       expression = "^.*error(?P<ssh_error>.*?)$"
 
     }
+    stage.regex { 
+      expression = "^.*( user|Accepted publickey for) (?P<connecting_user>.*?) .*$"
+
+    }
+    stage.regex { 
+      expression = "^.* (?P<connecting_ip>[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}) .*$"
+
+    }
+    stage.labels { 
+      values = { 
+        connecting_user = "", 
+        connecting_ip   = "", 
+
+      }
+    }
+    stage.geoip {
+      source  = "connecting_ip"
+      db      = "../maxmind/GeoLite2-City.mmdb"
+      db_type = "city"
+
+    }
+    stage.labels {
+      values = {
+        geoip_city_name          = "",
+        geoip_country_name       = "",
+        geoip_continent_name     = "",
+        geoip_continent_code     = "",
+        geoip_location_latitude  = "",
+        geoip_location_longitude = "",
+        geoip_postal_code        = "",
+        geoip_timezone           = "",
+        geoip_subdivision_name   = "",
+        geoip_subdivision_code   = "",
+
+      }
+	  }
     stage.metrics { 
       metric.counter { 
         name              = "ssh_total" 
