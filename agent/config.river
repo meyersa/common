@@ -98,8 +98,17 @@ loki.relabel "docker" {
 }
 
 loki.process "filter" { 
-  forward_to  = [loki.write.endpoint.receiver]
+  forward_to    = [loki.process.metrics.receiver] 
 
+  stage.metrics { 
+    metric.counter { 
+      name              = "log_lines_read"
+      match_all         = true 
+      action            = "inc"
+      max_idle_duration = "24h"
+    
+    }
+  }
   stage.drop { 
     older_than = "1h" 
     drop_counter_reason = "Too old" 
@@ -124,6 +133,80 @@ loki.process "filter" {
     expression  = ".*debug.*"
     drop_counter_reason = "Debug" 
     
+  }
+  stage.metrics{
+    metric.counter {
+      name        = "log_lines_processed"
+      match_all         = true
+      action            = "inc"
+      max_idle_duration = "24h"
+
+    }
+  }
+}
+
+loki.process "metrics" { 
+  forward_to  = [loki.write.endpoint.receiver]
+  
+  stage.match {
+    selector = "{unit=\"ssh.service\"}"
+
+    stage.regex { 
+      expression = "^Accepted(?P<ssh_accepted>.*?)$" 
+  
+    }
+    stage.regex { 
+      expression = "^.*closed(?P<ssh_closed>.*?)$"
+
+    }
+    stage.regex { 
+      expression = "^.*error(?P<ssh_error>.*?)$"
+
+    }
+    stage.metrics { 
+      metric.counter { 
+        name              = "ssh_total" 
+        match_all         = true 
+        action            = "inc" 
+        max_idle_duration = "24h"
+
+      }
+      metric.counter { 
+        name              = "ssh_success" 
+        source            = "ssh_accepted" 
+        action            = "inc" 
+        max_idle_duration = "24h"
+
+      }
+      metric.counter { 
+        name              = "ssh_closed" 
+        source            = "ssh_closed" 
+        action            = "inc" 
+        max_idle_duration = "24h" 
+
+      }
+      metric.counter { 
+        name              = "ssh_error" 
+        source            = "ssh_error" 
+        action            = "inc" 
+        max_idle_duration = "24h" 
+
+      }
+    }
+  }
+
+  stage.regex { 
+    expression = "^.*error(?P<error_total>.*?)$"
+
+  }
+  stage.metrics {
+    metric.counter { 
+      name              = "error_total" 
+      source            = "error_total"
+      action            = "inc" 
+      max_idle_duration = "24h"
+
+    }
   }
 }
 
