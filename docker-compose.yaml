@@ -25,8 +25,6 @@ services:
       BOUNCER_KEY_IPTABLES: "4JCich*XJd9j#3RsT5kac!#m*!m&2w"
     volumes: 
       - /var/log/journal:/run/log/journal
-      # - /var/run/docker.sock:/var/run/docker.sock
-      # - "/srv/crowdsec/config:/etc/crowdsec"
       - "./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml"
       - "./crowdsec/profiles.yaml:/etc/crowdsec/profiles.yaml"
       - "./crowdsec/slack.yaml:/etc/crowdsec/notifications/slack.yaml"
@@ -57,7 +55,7 @@ services:
       - NET_ADMIN
     network_mode: host
     volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
+     - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       NETWORK: proxy
       WHITELIST_FILTER: ancestor=cloudflare/cloudflared
@@ -112,10 +110,10 @@ services:
     volumes:
       - ./agent/config.river:/etc/agent/config.river
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run
       - /sys:/sys:ro
       - /proc:/host/proc:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/log/journal:/var/log/journal
       - /var/run/journal:/var/run/journal
       - /etc/machine-id:/etc/machine-id:ro
