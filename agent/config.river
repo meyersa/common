@@ -84,6 +84,12 @@ loki.relabel "journal" {
     target_label  = "unit" 
 
   }
+    rule { 
+    action        = "replace" 
+    source_labels = ["__journal_syslog_identifier"]
+    target_label  = "syslog_identifier" 
+
+  }
 }
 
 loki.relabel "docker" {
