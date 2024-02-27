@@ -116,22 +116,22 @@ loki.process "filter" {
     }
   }
   stage.drop { 
-    older_than = "1h" 
+    older_than = "24h" 
     drop_counter_reason = "Too old" 
 
   }
   stage.drop {
-    longer_than = "3KB"
+    longer_than = "5KB"
     drop_counter_reason = "Too big" 
     
   }
   stage.drop { 
-    expression = "GrafanaAgent|Uptime-Kuma" 
+    expression = ".*GrafanaAgent|Uptime-Kuma.*" 
     drop_counter_reason = "Monitoring Host"
 
   }
   stage.drop { 
-    expression = "could not set up a wait request to the Docker client"
+    expression = ".*could not set up a wait request to the Docker client|could not acquire work|context canceled.*"
     drop_counter_reason = "Spammy Log" 
 
   }
