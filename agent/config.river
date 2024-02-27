@@ -21,10 +21,10 @@ prometheus.scrape "unix" {
 
 }
 
-prometheus.exporter.agent "default" {}
+prometheus.exporter.self "default" {}
 
 prometheus.scrape "agent" {
-  targets     = prometheus.exporter.agent.default.targets 
+  targets     = prometheus.exporter.self.default.targets 
   job_name   = env("USE_HOSTNAME")
   forward_to  = [prometheus.remote_write.prom.receiver] 
 
